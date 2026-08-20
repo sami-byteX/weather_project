@@ -1,418 +1,227 @@
-# Django Weather Application
+# 🌦️ Weather App
 
-A modern, responsive weather application built with Django and Django REST Framework. This application provides real-time weather information for any city using the Open-Meteo API and Nominatim geocoding service.
+A modern weather application built with **Django** and **Django REST Framework** that lets users search for any city in the world and get real-time weather information.
 
-## Project Structure
+<img src="https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white"/>
+<img src="https://img.shields.io/badge/DRF-A30000?style=for-the-badge&logo=django&logoColor=white"/>
+<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+<img src="https://img.shields.io/badge/Bootstrap_5-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white"/>
+<img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black"/>
 
-This repository contains a single, complete Django weather application:
+---
 
-```
-weather_project/          # Complete Django project with working weather app
-├── weather/              # Django app containing all weather functionality
-│   ├── models.py         # Database models for caching
-│   ├── services.py       # Core service layer for API calls
-│   ├── views.py          # DRF API views
-│   ├── serializers.py    # DRF serializers
-│   ├── templates/        # HTML templates
-│   └── static/           # CSS and JavaScript files
-└── weather_project/      # Project configuration
-    ├── settings.py       # Django settings
-    ├── urls.py           # URL routing
-    └── wsgi.py           # WSGI configuration
-```
+## Overview
 
-**This is a complete, functional weather application** with:
+This is a complete, functional weather application with:
+
 - Full backend API using Django REST Framework
 - Complete frontend with Bootstrap 5 and JavaScript
 - Database models for caching and persistence
 - Working API endpoints and user interface
 
-## Features
+### How it works
 
-- **Real-time Weather Data**: Current temperature, humidity, wind speed, and weather conditions
-- **City Geocoding**: Automatic conversion of city names to coordinates
-- **Smart Caching**: 10-minute cache for improved performance
-- **Responsive Design**: Bootstrap 5 frontend that works on all devices
-- **RESTful API**: Clean API endpoints for weather data
-- **Error Handling**: Comprehensive error management with user-friendly messages
-- **Modern UI**: Beautiful gradient design with smooth animations
+1. User visits the website (`http://127.0.0.1:8001/`)
+2. Types a city name in the search box (e.g., "London", "New York")
+3. Clicks **"Get Weather"**
+4. Sees a loading spinner while data is fetched
+5. Views the weather information:
+   - Current temperature
+   - Weather condition (sunny, cloudy, etc.)
+   - Humidity percentage
+   - Feels-like temperature
+   - Country name
+
+---
+
+## Architecture
+
+```
+User (Browser)          Frontend                Backend
+                      (HTML+CSS+JS)           (Django+DRF)
+ Enter City    ──▶   JavaScript Fetch   ──▶    API Views
+ View Results  ◀──   Updates DOM        ◀──    Service Layer
+                                                    │
+                                                    ▼
+                                          External APIs
+                                          • Open-Meteo (weather)
+                                          • Nominatim (geocoding)
+```
+
+**Request flow:** form submit → JavaScript `fetch()` → Django URL router → `WeatherAPIView` → `WeatherRequestSerializer` validation → service layer → Nominatim geocoding (cached) → Open-Meteo weather fetch (cached) → JSON response → DOM update.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Django, Django REST Framework, Python |
+| Frontend | HTML, CSS, Bootstrap, vanilla JavaScript (Fetch API) |
+| Data format | JSON |
+| Geocoding | [Nominatim](https://nominatim.openstreetmap.org/) |
+| Weather data | [Open-Meteo](https://api.open-meteo.com/) |
+| Caching | Django's cache framework + database models |
+
+---
 
 ## Project Structure
 
 ```
-weather_project/
-├── weather/
-│   ├── __init__.py
+weather_project/           # Main project directory
+├── weather/                # Django app for weather functionality
 │   ├── admin.py
 │   ├── apps.py
-│   ├── models.py          # Database models for caching
-│   ├── services.py        # Core service layer for API calls
-│   ├── views.py           # DRF API views
-│   ├── urls.py            # App-level URL routing
-│   ├── serializers.py     # DRF serializers
-│   ├── templates/weather/
-│   │   └── index.html     # Bootstrap 5 frontend
-│   └── static/weather/
-│       ├── js/weather.js  # JavaScript for API calls
-│       └── css/style.css  # Modern responsive styling
-└── weather_project/
-    ├── __init__.py
+│   ├── models.py            # Database models (City, WeatherCache)
+│   ├── services.py           # Business logic and external API calls
+│   ├── views.py               # API endpoints and request handling
+│   ├── urls.py                 # URL routing for the app
+│   ├── serializers.py          # Data validation and serialization
+│   ├── templates/
+│   │   └── weather/
+│   │       └── index.html
+│   └── static/
+│       └── weather/
+│           ├── css/
+│           │   └── style.css
+│           └── js/
+│               └── weather.js
+└── weather_project/         # Project configuration
+    ├── settings.py
+    ├── urls.py
     ├── asgi.py
-    ├── settings.py        # Configured for templates, static files, DRF
-    ├── urls.py            # Project-level URL routing
     └── wsgi.py
 ```
 
-## Installation & Setup
+---
 
-### Prerequisites
+## Backend
 
-- Python 3.8+
-- Existing virtual environment at `C:\Users\Rogue\Documents\projects\.venv`
+### Key components
 
-### 1. Activate Virtual Environment
+- **Models** (`models.py`) — database structure (City, WeatherCache)
+- **Views** (`views.py`) — handle HTTP requests and responses
+- **Serializers** (`serializers.py`) — validate input and format output
+- **Service layer** (`services.py`) — business logic and external API calls
 
-```bash
-# Navigate to the project directory
-cd C:\Users\Rogue\Documents\projects
+### API endpoint
 
-# Activate the existing virtual environment
-C:\Users\Rogue\Documents\projects\.venv\Scripts\activate
-```
+`POST /api/weather/`
 
-### 2. Install Dependencies
-
-The project uses the existing requirements.txt which includes:
-- Django 6.0.3
-- Django REST Framework 3.16.1
-- requests 2.31.0
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Database Setup
-
-```bash
-# Navigate to the weather project directory
-cd weather_project
-
-# Run migrations
-python manage.py migrate
-
-# Create superuser (optional, for admin access)
-python manage.py createsuperuser
-```
-
-### 4. Start Development Server
-
-```bash
-python manage.py runserver 8001
-```
-
-The application will be available at:
-- **Frontend**: http://127.0.0.1:8001/
-- **Admin**: http://127.0.0.1:8001/admin/
-- **API Endpoint**: http://127.0.0.1:8001/api/weather/
-
-## API Usage
-
-### Endpoint
-
-```
-POST /weather/api/weather/
-```
-
-### Request Format
-
+**Request:**
 ```json
 {
-    "city": "CityName"
+    "city": "London"
 }
 ```
 
-### Response Format
-
+**Response:**
 ```json
 {
     "city": "London",
     "country": "United Kingdom",
     "temperature": 15.2,
     "humidity": 65,
-    "wind_speed": 12.5,
-    "weather_condition": "Partly cloudy",
-    "sunrise": "2023-12-16T07:30:00+00:00",
-    "sunset": "2023-12-16T17:45:00+00:00",
-    "timestamp": "2023-12-16T12:00:00+00:00"
+    "weather_condition": "Partly cloudy"
 }
 ```
 
-### Error Responses
+### Service layer flow (`WeatherManager`)
 
-```json
-{
-    "error": "City 'InvalidCity' not found"
-}
+1. Convert city name to coordinates via `GeocodingService`
+2. Fetch weather data for those coordinates via `WeatherService`
+3. Map the numeric weather code to a human-readable description
+4. Return the formatted result
+
+### External API integration
+
+**Nominatim (geocoding)**
+```
+GET https://nominatim.openstreetmap.org/search
+    ?q=London
+    &format=json
+    &limit=1
+    &addressdetails=1
+```
+Must include a proper `User-Agent` header and stay within 1 request per second.
+
+**Open-Meteo (weather)**
+```
+GET https://api.open-meteo.com/v1/forecast
+    ?latitude=51.5074
+    &longitude=-0.1278
+    &current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code
+    &timezone=auto
 ```
 
-## Backend Architecture
+**Weather codes:**
 
-### Service Layer (`weather/services.py`)
+| Code | Condition |
+|---|---|
+| 0 | Clear sky |
+| 1 | Mainly clear |
+| 2 | Partly cloudy |
+| 3 | Overcast |
+| 45 | Fog |
+| 51–57 | Drizzle |
+| 61–67 | Rain |
+| 71–77 | Snow |
+| 80–86 | Showers |
+| 95–99 | Thunderstorm |
 
-The application implements a clean service layer architecture:
+### Error handling
 
-1. **GeocodingService**: Handles city-to-coordinates conversion using Nominatim API
-2. **WeatherService**: Fetches weather data from Open-Meteo API
-3. **WeatherCodeMapper**: Maps Open-Meteo weather codes to user-friendly descriptions
-4. **WeatherManager**: Orchestrates all services and handles caching
+Custom `WeatherServiceError` exceptions are raised for failures and mapped to specific HTTP responses:
 
-### Caching Strategy
+- Empty/invalid city input → validation error
+- City not found → `400` with a specific message
+- Network/upstream failure → `503` with a friendly message
 
-- **Geocoding Cache**: 1-hour cache for city coordinates (geocoding doesn't change often)
-- **Weather Cache**: 10-minute cache for weather data (balances freshness with performance)
-- **Database Cache**: Persistent storage of city and weather data for offline access
+---
 
-### Models (`weather/models.py`)
+## Frontend
 
-- **City**: Stores city information and coordinates
-- **WeatherCache**: Caches weather data with expiration tracking
+- **Search form** — captures the city name and submits without a page reload
+- **Loading spinner** — shown while the request is in flight
+- **Weather card** — populated via DOM updates once data returns
+- **Error message box** — shown on failed lookups
 
-## Frontend Features
+The frontend uses the JavaScript `fetch()` API to call `/api/weather/`, including a CSRF token (required by Django) read from cookies.
 
-### Technologies Used
+---
 
-- **Bootstrap 5**: Responsive framework
-- **Font Awesome**: Icons
-- **Custom CSS**: Modern styling with gradients and animations
-- **Vanilla JavaScript**: API communication and DOM manipulation
+## Caching Strategy
 
-### Key Features
+| Data | Cache duration | Why |
+|---|---|---|
+| Geocoding result (city → coordinates) | 1 hour (3600s) | Coordinates don't change |
+| Weather data | 10 minutes (600s) | Balances freshness with API load |
 
-- **Loading States**: Spinner during API calls
-- **Error Handling**: User-friendly error messages
-- **Responsive Design**: Works on mobile and desktop
-- **Smooth Animations**: Professional user experience
+Two levels of caching are used:
 
-## API Integration
+1. **In-memory cache** for external API responses (geocoding + weather), keyed by `geocode_<city>` and `weather_<lat>_<lon>`.
+2. **Database persistence** via the `City` model using `get_or_create()`, so repeated lookups don't need a fresh geocode.
 
-### Open-Meteo API
+---
 
-- **Purpose**: Provides current weather data
-- **Endpoint**: `https://api.open-meteo.com/v1/forecast`
-- **Data**: Temperature, humidity, wind speed, weather codes, sunrise/sunset
-- **Rate Limits**: Free tier with generous limits for development
+## Software Engineering Concepts Demonstrated
 
-### Nominatim API
+- **REST API design** — resource-based endpoints using standard HTTP methods and JSON
+- **MTV architecture** (Django's Model-Template-View pattern) — clear separation between data, logic, and presentation
+- **Client-server communication** — stateless HTTP requests/responses between the JS frontend and Django backend
+- **Asynchronous requests** — non-blocking `fetch()` calls with loading states
+- **API abstraction** — the service layer hides the complexity of calling two external APIs behind a simple interface
+- **Separation of concerns** — models, views, serializers, services, templates, and static files each handle one responsibility
 
-- **Purpose**: Geocoding city names to coordinates
-- **Endpoint**: `https://nominatim.openstreetmap.org/search`
-- **Usage**: Converts city names to latitude/longitude for weather API
-- **Rate Limits**: 1 request per second, must include User-Agent
+---
 
-## Configuration
-
-### Settings (`weather_project/settings.py`)
-
-Key configurations:
-- **Templates**: Located in `weather/templates/`
-- **Static Files**: Located in `weather/static/`
-- **Django REST Framework**: JSON renderer and parser only
-- **Caching**: Local memory cache with 10-minute timeout
-- **Security**: CSRF protection enabled
-
-### Environment Variables
-
-No environment variables required for basic functionality. For production deployment, consider:
-
-```python
-# In settings.py
-DEBUG = False
-ALLOWED_HOSTS = ['your-domain.com']
-SECRET_KEY = os.environ.get('SECRET_KEY')
-```
-
-## Testing
-
-### Manual Testing
-
-Test the application with various inputs:
-
-1. **Valid Cities**: "London", "New York", "Tokyo"
-2. **Invalid Input**: Empty strings, special characters
-3. **Non-existent Cities**: Made-up city names
-4. **Edge Cases**: Very long city names, cities with special characters
-
-### API Testing
-
-Use curl or Postman to test the API endpoint:
+## Running Locally
 
 ```bash
-curl -X POST http://127.0.0.1:8000/weather/api/weather/ \
-  -H "Content-Type: application/json" \
-  -d '{"city": "London"}'
+git clone <your-repo-url>
+cd weather_project
+python manage.py migrate
+python manage.py runserver 8001
 ```
 
-## Performance Considerations
-
-### Caching Benefits
-
-- **Reduced API Calls**: Caching minimizes external API requests
-- **Faster Response Times**: Cached data serves instantly
-- **Rate Limit Protection**: Prevents hitting API rate limits
-- **Offline Capability**: Database cache allows some functionality without internet
-
-### Optimization Features
-
-- **Smart Cache Keys**: Unique keys based on city name and coordinates
-- **Cache Expiration**: Automatic cleanup of expired cache entries
-- **Database Indexing**: Optimized queries for city lookups
-- **Error Resilience**: Graceful handling of API failures
-
-## Security
-
-### CSRF Protection
-
-- Enabled by default in Django
-- Required for POST requests to API endpoint
-- Automatically handled by frontend JavaScript
-
-### Input Validation
-
-- **City Name**: Maximum 100 characters, minimum 1 character
-- **Trimming**: Automatic whitespace removal
-- **Error Messages**: User-friendly validation feedback
-
-### API Security
-
-- **No Authentication**: Simple public API for weather data
-- **Rate Limiting**: Handled by external APIs
-- **Input Sanitization**: Django handles SQL injection protection
-
-## Deployment
-
-### Production Considerations
-
-1. **Static Files**: Configure static file serving (e.g., with Nginx)
-2. **Database**: Use PostgreSQL instead of SQLite
-3. **Caching**: Use Redis for distributed caching
-4. **Security**: Set DEBUG=False, configure ALLOWED_HOSTS
-5. **Environment**: Use environment variables for sensitive data
-
-### Docker Deployment (Optional)
-
-Create a `Dockerfile`:
-
-```dockerfile
-FROM python:3.11-slim
-
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . .
-RUN python manage.py collectstatic --noinput
-
-EXPOSE 8000
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **ModuleNotFoundError**: Ensure virtual environment is activated
-2. **Port Already in Use**: Change port with `python manage.py runserver 8001`
-3. **API Rate Limits**: Check if requests are being blocked by external APIs
-4. **Static Files Not Loading**: Run `python manage.py collectstatic`
-
-### Debug Mode
-
-Enable debug mode in `settings.py`:
-
-```python
-DEBUG = True
-```
-
-### Logging
-
-Check Django logs for API errors:
-
-```python
-# In settings.py
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'weather': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-        },
-    },
-}
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make changes with proper documentation
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## Support
-
-For issues and questions:
-- Check the troubleshooting section
-- Review Django and DRF documentation
-- Open an issue on the project repository
-
-## Third-Party APIs
-
-### Open-Meteo
-- **Website**: https://open-meteo.com/
-- **API Documentation**: https://open-meteo.com/en/docs
-- **Rate Limits**: Free tier with generous limits
-
-### Nominatim
-- **Website**: https://nominatim.org/
-- **Usage Policy**: https://operations.osmfoundation.org/policies/nominatim/
-- **Rate Limits**: 1 request per second
-
-## Assumptions and Limitations
-
-### Assumptions
-
-1. **Internet Connection**: Application requires internet for API calls
-2. **API Availability**: Depends on Open-Meteo and Nominatim API uptime
-3. **Timezone**: Uses UTC for internal operations, converts to local timezone for display
-4. **User Input**: Assumes users will enter valid city names
-
-### Limitations
-
-1. **No Dark Mode**: As specified in requirements
-2. **No Geolocation**: As specified in requirements
-3. **Single City**: Only supports one city at a time
-4. **Current Weather Only**: No historical or forecast data
-5. **No Authentication**: Public API without user accounts
-
-## Future Enhancements
-
-Potential improvements for future versions:
-
-1. **Forecast Data**: Add 7-day weather forecast
-2. **Multiple Cities**: Support for multiple saved cities
-3. **User Accounts**: Personalized weather preferences
-4. **Push Notifications**: Weather alerts and notifications
-5. **Advanced Caching**: Redis for production deployments
-6. **Mobile App**: Native mobile application
-7. **Unit Tests**: Comprehensive test suite
-8. **CI/CD**: Automated deployment pipeline
+Then open `http://127.0.0.1:8001/` and search for a city.
